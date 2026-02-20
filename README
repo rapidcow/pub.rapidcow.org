@@ -3,5 +3,5 @@ I'm thinking of throwing homepages and documentations
 in here, so that I don't have to risk having them go out
 while experimenting with my REAL "www" web site.
 
-"docs/" is the web root directory and "docs/CNAME" is read
-by GitHub Pages (since I am deploying from a branch).
+"docs/" is the web root directory and "docs/CNAME" is
+read by GitHub Pages (since I am deploying from a branch).
