@@ -3,5 +3,7 @@ I'm thinking of throwing homepages and documentations
 in here, so that I don't have to risk having them go out
 while experimenting with my REAL "www" web site.
 
-"html/" is the web root directory and "CNAME" is read
-by GitHub Pages (since I am deploying from a branch).
+"html/" is the web root directory and "CNAME" is the
+canonical domain name (though GitHub doesn't seem to
+consult it anymore, as this seems only configurable
+in my repository Settings... oh welp.)
