@@ -1,0 +1,7 @@
+"pub" is a web site dedicated to (current) PUBLICATIONS.
+I'm thinking of throwing homepages and documentations
+in here, so that I don't have to risk having them go out
+while experimenting with my REAL "www" web site.
+
+"html/" is the web root directory and "CNAME" is read
+by GitHub Pages (since I am deploying from a branch).
