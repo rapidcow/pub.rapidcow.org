@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Sort::Search</title>
+	<meta name="description" content="general-purpose binary search functions">
+	<link rel="stylesheet" href="../index.css" type="text/css">
+</head>
+<body>
+	<h1 id="NAME">Sort::Search</h1>
+	<p>This is the home page for the (UNNAMED, but possibly "Sort-Search"?)
+	distribution.  I will try to get it completed and published <s>shortly
+	after my school term ends.</s> (<strong>towards the end of January!</strong>
+	I'll probably also have r/perl and/or module-authors review my choice of
+	name&hellip;.)</p>
+	<h2 id="SRC">Source code (Git repository)</h2>
+	<p>It will be hosted by the generous GitHub... here is the URL:</p>
+	<ul>
+		<li><a href="https://github.com/rapidcow/p5-Sort-Search">https://github.com/rapidcow/p5-Sort-Search</a></li>
+	</ul>
+	<p>If you prefer, you can also clone/view <a href="https://codeberg.org/rapidcow/p5-Sort-Search">Codeberg</a>
+	or <a href="https://git.sr.ht/~rapidcow/p5-Sort-Search">SourceHut</a>.</p>
+	<p>When I have set up and properly tested anonymous Git access
+	via https / ssh / git protocol I'll put up a different URL you
+	can use here too. :)</p>
+	<h2 id="DEP">Dependencies</h2>
+	<p>Sort::Search should run on most Perls (I put Perl 5.6
+	because that's the default minimum version of <a href="https://metacpan.org/dist/Module-Starter/view/bin/module-starter">module-starter</a>,
+	but I haven't really tested that far&hellip; I have
+	checked that that I only use core modules according
+	to corepack, either way. :x)</p>
+	<p>If <a href="metacpan.org/pod/Want">Want</a> is installed,
+	it would be called to determine the exact number of values
+	requested in list context.  The behavior shouldn't change,
+	but it may avoid having to copy array elements for the third
+	argument (though this may be redundant if your Perl is built
+	with COW, I haven't benchmarked anything either so&hellip;)</p>
+	<h2 id="BUG">Report bugs</h2>
+	<p>To submit any bugs you found (this early though???),
+	rt.cpan.org won't work as I haven't uploaded the package to CPAN.
+	So use the GitHub bug tracker: <a href="https://github.com/rapidcow/p5-Sort-Search/issues">https://github.com/rapidcow/p5-Sort-Search/issues</a>.</p>
+	<p>If you can and are willing to write up a fix, the GitHub
+	way to do it is to submit a Pull Request:
+	<a href="https://github.com/rapidcow/p5-Sort-Search/pulls">https://github.com/rapidcow/p5-Sort-Search/pulls</a></p>
+	<p>You can also send patches since I know how to apply them, but
+	the issue is I don't have a real mailing list, so other people
+	will not be able to join the discussion.  If your mail provider
+	doesn't let you change the author name and email as they appear
+	on the "From" header, please also let me know what alternatives
+	you would prefer.</p><p>You can also use <a href="https://git-scm.com/docs/git-request-pull">git-request-pull</a>
+	if you made your changes in a Git repository that is not on GitHub;
+	be noted that git-pull will include the URL of your repository,
+	so if that's not something you want other people to see, you
+	should tell me about it too.</p>
+	<h2 id="SECURITY">Report security vulnerabilities</h2>
+	<p>From the current revision of <a href="https://github.com/rapidcow/p5-Sort-Search/blob/233453a5faa13ecdf2b0d9f300eabdd43dfd0799/.github/SECURITY.md">SECURITY.md</a>:</p>
+	<blockquote>
+		<p>This is the Security Policy for the CPAN distribution <code>Sort-Search</code>, based on the CPAN Security Group's Guidelines for Adding a Security Policy to Perl Distributions (version 1.4.2).</p>
+		<p>Report to:</p>
+		<ul>
+			<li>GitHub security advisories: <a href="https://github.com/rapidcow/p5-Sort-Search/security/advisories">https://github.com/rapidcow/p5-Sort-Search/security/advisories</a>; or</li>
+			<li>To me (the author) directly: <a href="mailto:security@rapidcow.org">security@rapidcow.org</a></li>
+		</ul>
+	</blockquote>
+	<h2 id="POD">Documentation</h2>
+	<p>I have written some over <a href="https://www.rapidcow.org/~ethan/FastLook.pm">here</a>
+	but it's too long and unstructured for people to actually make use of it.
+	<s>I'll write up a new one near the end of this month (and year)</s> (okay
+	please just wait until I get back to school i really don't wanna do it now
+	<code>TvT</code>) but until then that would be the best I got.</p>
+	<p>There will also be a separate Cookbook/Tutorial POD for a more
+	example-driven approach to these functions.  The documentation
+	itself will be more focused on usage.  I may take inspiration from
+	features that the existing binary search libraries lack, such as
+	<a href="https://github.com/daoswald/List-BinarySearch-XS/issues/2">this issue</a>.</p>
+	<p>There is also a more narrative approach that is basically
+	the design note, though it is more or less for myself and will
+	not be included in the distribution.  There is an
+	<a href="https://github.com/rapidcow/p5-Sort-Search/blob/master/src/00INTRO.txt">initial section</a>,
+	and there will be subsequent sections that cover the less
+	theoretical and more practical cases you may encounter.</p>
+</body>
