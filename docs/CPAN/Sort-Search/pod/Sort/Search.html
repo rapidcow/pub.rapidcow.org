@@ -1,0 +1,357 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Sort::Search - binary search on contiguous sorted ranges</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:ethan@rapidcow.org" title="Pod::Html 1.35 (with xrefs by Ethan)" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a>
+    <ul>
+      <li><a href="#Terminology">Terminology</a></li>
+      <li><a href="#Orientation-variants">Orientation variants</a></li>
+      <li><a href="#Lower-upper-variants">Lower/upper variants</a></li>
+      <li><a href="#Existence-variants">Existence variants</a></li>
+    </ul>
+  </li>
+  <li><a href="#SUBROUTINES">SUBROUTINES</a></li>
+  <li><a href="#COMMON-INTERFACE">COMMON INTERFACE</a></li>
+  <li><a href="#CAVEATS">CAVEATS</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+  <li><a href="#LINKS">LINKS</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>Sort::Search - binary search on contiguous sorted ranges</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<pre><code>use Sort::Search qw(
+  bisectl bisectr bixectl bixectr
+  blsrch0 brsrch0 blsrch1 brsrch1
+  blsrch2 brsrch2 blsrchx brsrchx
+);
+
+bisectl { OK } ARRAY;   # leftmost True (F to T)
+bisectr { OK } ARRAY;   # rightmost True (T to F)
+bixectl { OK } ARRAY;   # any True  (F to T)
+bixectr { OK } ARRAY;   # any True  (T to F)
+
+blsrch0 { ORD } ARRAY;  # leftmost &gt;= 0 (- to +)
+blsrch1 { ORD } ARRAY;  # leftmost &gt; 0  (- to +)
+brsrch0 { ORD } ARRAY;  # rightmost &gt;= 0 (+ to -)
+brsrch1 { ORD } ARRAY;  # rightmost &gt; 0  (+ to -)
+
+blsrch2 { ORD } ARRAY;  # (blsrch0, blsrch1)
+brsrch2 { ORD } ARRAY;  # (brsrch0, brsrch1)
+blsrchx { ORD } ARRAY;  # any == 0  (- to +)
+brsrchx { ORD } ARRAY;  # any == 0  (+ to -)</code></pre>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p><b>NOTE</b>: If you are new to this module, I recommend starting with <a href="Search/Cookbook.pm.html">Sort::Search::Cookbook</a>, which has quick references and examples for common use cases.</p>
+
+<h2 id="Terminology">Terminology</h2>
+
+<p>This module implements two classes of search algorithms, which will named separately in this document as the <i>bisection method</i> and the (ordinary) <i>binary search</i> for distinction. A brief definition follows.</p>
+
+<ul>
+
+<li><p>The <i>bisection method</i> works with a monotonic predicate (<b>OK</b>) with a unique transition point from False to True, or vice versa.</p>
+
+<p>For example, the array <code>[0, 1, 2, 3, 4]</code> with respect to the predicate <code>$_ &gt;= 2</code> transitions from False at <code>1</code> into True at <code>2</code>, and the array <code>[5, 4, 3, 2, 1]</code> with respect to the predicate <code>$_ &gt;= 3</code> transitions from True at <code>3</code> to False at <code>2</code>. We name the boundary between these two elements the <i>bisection point</i>.</p>
+
+</li>
+<li><p>The <i>binary search</i> works with a C-like comparison function, named the <i>ordering</i> (<b>ORD</b>), with two unique transition points from negative to 0, then 0 to positive. Such a function is typically constructed with respect to a target value to be located within the array (hence the name &quot;search&quot;).</p>
+
+<p>For example, suppose we want to locate <code>$x = 3</code> in the array <code>[1, 2, 3, 3, 4]</code>. We can consider the ordering <code>$_ &lt;=&gt; $x</code>, which returns negatives for <code>[1, 2]</code>, zeros for <code>[3, 3]</code>, and positives for <code>[4]</code>. We name the boundary between the negatives and the zeros the <i>lower bisection point</i>, and that between the zeros and the positives the <i>upper bisection point</i>.</p>
+
+</li>
+</ul>
+
+<p>In both cases, we call the return value of the predicate/ordering the <i>comparison result</i>, or <code>$cmp</code> for short.</p>
+
+<h2 id="Orientation-variants">Orientation variants</h2>
+
+<p>For every function in the conventional direction (i.e., left-to-right, true-to-false, increasing), a dual variant is provided. The conventional and dual directions are identified by the lowercase letter L and R. To re-use my examples, this:</p>
+
+<pre><code>use Sort::Search qw(bisectl);
+my @A = ( 0, 1, 2, 3, 4 );
+print $A[ bisectl { $_ &gt;= 2 } \@A ];</code></pre>
+
+<p>prints <code>2</code> because the left-variants prefer to return the leftmost index of the matching range <code>[2, 3, 4]</code>, or one past the final index (<code>5</code>) if no such range exists.</p>
+
+<pre><code>use Sort::Search qw(bisectr);
+my @B = ( 5, 4, 3, 2, 1 );
+print $B[ bisectr { $_ &gt;= 3 } \@B ];</code></pre>
+
+<p>prints <code>3</code> because the right-variants prefer to return the rightmost index of the matching range <code>[5, 4, 3]</code>, or one below the initial index (<code>-1</code>) if no such range exists. (Care should be taken in this specific case as indexing by <code>-1</code> wraps back to the last element.)</p>
+
+<h2 id="Lower-upper-variants">Lower/upper variants</h2>
+
+<p>For <i>binary search</i> functions in particular, there are the 0,1 variants corresponding to the aforementioned <i>lower bisection point</i> and <i>upper bisection point</i>. These points are best visualized by plotting the image of the ordering and taking note of the range of elements mapped to zero. For instance, consider the first 13 decimal digits of pi (including the integer part) arranged in increasing order as the haystack, and the number <code>$x = 5</code> as the needle. Then the zeros (as marked by &quot;=&quot; below) are bound by the boundary where it meets the negatives (&quot;&lt;&quot;) and positives (&quot;&gt;&quot;):</p>
+
+<pre><code>use Sort::Search qw(blsrch0 blsrch1 brsrch0 brsrch1);
+my (@a, $lb, $lx, $ub, $ux) = sort { $a &lt;=&gt; $b }
+   ( sprintf(&quot;%.13f&quot;, 4*atan2(1,1)) =~ /[0-9]/g )[0..12];
+my $x = 5;
+
+$lb = blsrch0 {$_&lt;=&gt;$x} \@a;  $ux = blsrch1 {$_&lt;=&gt;$x} \@a;  print &quot;[$lb,$ux)&quot;;
+#  (left lower bound)           (left upper bound)             =&gt;  [6,  9  )
+#    first $_ &gt;= $x  -.          ,-  first $_ &gt; $x
+#                      \        /
+#    0  1  2  3  4  5 [6  7  8 [9  a  b  c   index of $_
+#    -  -  -  -  -  -  0  0  0  +  +  +  +   ord ($_ &lt;=&gt; $x)
+#    &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;========------------
+#    1  1  2  3  3  4  5  5  5  6  8  9  9   value of $_
+#    -----------------========&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+#    +  +  +  +  +  +  0  0  0  -  -  -  -   ord ($x &lt;=&gt; $_)
+#    0  1  2  3  4  5] 6  7  8] 9  a  b  c   index of $_
+#                   /        \
+#   last $x &gt; $_  -&#39;          `-  last $x &gt;= $_
+# (right lower bound)            (right upper bound)           =&gt;  (  5,  8]
+$lx = brsrch1 {$x&lt;=&gt;$_} \@a;  $ub = brsrch0 {$x&lt;=&gt;$_} \@a;  print &quot;($lx,$ub]&quot;;</code></pre>
+
+<p>The 0 variants (<b>blsrch0</b>, <b>brsrch0</b>) return the inclusive bounds for when ordering transitions from &quot;-&quot; to &quot;0&quot;, while the 1 variants (<b>blsrch1</b>, <b>brsrch1</b>) return the exclusive bounds for when the ordering transitions from &quot;0&quot; to &quot;+&quot;. For left search in particular, <b>blsrch0</b> is the inclusive lower bound, and <b>blsrch1</b> is the exclusive upper bound. The 2 variants (<b>blsrch2</b>, <b>brsrch2</b>) return both inclusive and exclusive bounds at once, in that order; in scalar context, they return the absolute difference which corresponds to the range of equal values (i.e. the &quot;0&quot;s).</p>
+
+<p>A more compact (albeit possibly obscure) characterization of the 0,1 variants is that they are the composition of the predicates <code>&amp;$ord &gt;= 0</code> and <code>&amp;$ord &gt; 0</code> on top of the bisection functions of the corresponding orientations. Note that this formal characterization intentionally makes no mention of consistency with the total order from which it is derived; in particular it is possible to extend the notion of equality by mapping any contiguous region one wishes to find to &quot;0&quot;, provided that it is properly bounded by &quot;+&quot; and &quot;-&quot;.</p>
+
+<p>Another thing to note is that, given the same underlying array, the ordering should be reversed when orientation is flipped. Usually when you could flip the operands to achieve this, as I have shown above with <code>$_ &lt;=&gt; $x</code> for left search and <code>$x &lt;=&gt; $_</code> for right search. But in restrained cases where either (1) you don&#39;t have access to both operands and have to work with the ordering as a blackboxed unary function of <code>$_</code>, or (2) the needle is not interchangeable with <code>$_</code> (say, when the needle is a field of a larger structure), you can negate the ordering instead.</p>
+
+<h2 id="Existence-variants">Existence variants</h2>
+
+<p>The bisection and the 0 variants have x variants which return as soon as it finds a match. (Mnemonic: &quot;x&quot; stands for &quot;eXists&quot;.)</p>
+
+<ul>
+
+<li><p><b>bixectl</b> is a modified version of <b>bisectl</b> that returns any index for which the predicate returns True. In the case that the predicate attains True at exactly one point or never attains True, they behave identically. For <b>bixectr</b>, it&#39;s the same against <b>bisectr</b>.</p>
+
+</li>
+<li><p><b>blsrchx</b> is a modified version of <b>blsrch0</b> that returns any index for which the predicate returns 0. In the case that the ordering attains 0 at exactly one point or skips it entirely, they behave identically. For <b>brsrchx</b>, it&#39;s the same against <b>brsrch0</b>.</p>
+
+</li>
+</ul>
+
+<h1 id="SUBROUTINES">SUBROUTINES</h1>
+
+<p>All subroutines are exported on-demand. All subroutines share the same interface for input and output described in <a href="#COMMON-INTERFACE">&quot;COMMON INTERFACE&quot;</a>. The general behavior of each subroutine on arbitrary ranges is described, but in the common form that I anticipate most people to use (calling with the array form with no explicit limits, and returning in scalar context), it is sufficient to know the following:</p>
+
+<ul>
+
+<li><p>For left searches (subroutines containing the letter &quot;l&quot;), <b>$lo</b> is the index of the leftmost/first array element and <b>$hi</b> is one more than the rightmost/final array element. Notably, <b>$hi</b> is the fallback index when search finds a bisection point to the right of the whole array.</p>
+
+</li>
+<li><p>For right searches (subroutines containing the letter &quot;r&quot;), <b>$lo</b> is one less than the index of the leftmost/first array element and <b>$hi</b> is the rightmost/final array element. Notably, <b>$lo</b> is the fallback index when search finds a bisection point to the left of the whole array.</p>
+
+</li>
+</ul>
+
+<p>To re-re-use the examples from the <a href="#DESCRIPTION">&quot;DESCRIPTION&quot;</a> section (assuming <a href="https://perldoc.perl.org/perlvar#$%5B">$[</a> is 0), the implicit search range for <code>bisectl { ... } \@A</code> is <code>$lo = 0</code> and <code>$hi = 5</code>, and the implicit search range for <code>bisectr { ... } \@B</code> is <code>$lo = -1</code> and <code>$hi = 4</code>. Note that the two searches have different fallback indices: <code>$hi = 5</code> for the left search and <code>$lo = -1</code> for the right search.</p>
+
+<dl>
+
+<dt id="bisectl-OK-ARRAY"><b>bisectl { OK } ARRAY</b></dt>
+<dd>
+
+</dd>
+<dt id="bixectl-OK-ARRAY"><b>bixectl { OK } ARRAY</b></dt>
+<dd>
+
+<p>Perform left bisection with respect to a predicate <b>OK</b> on the half-open interval <code>[$lo, $hi)</code>, where <code>$lo</code> precedes <code>$hi</code> in the argument list. The prototype is <code>&amp;$;$$</code>.</p>
+
+<p>The predicate should be increasing over every pair of adjacent indices it is defined on. That is, true values always follow false values:</p>
+
+<pre><code>F F F ... F T T T   ok(x)
+0 1 2     6 7 8 9      x</code></pre>
+
+<p>Let <code>$ok</code> denote the predicate, and set <code>$ok-&gt;($hi) = 1</code>. The return value of <b>bisectl</b> is the unique index <code>$x</code> on the closed interval <code>[$lo, $hi]</code> such that:</p>
+
+<ul>
+
+<li><p><code>$ok-&gt;($x)</code> is true.</p>
+
+</li>
+<li><p>For all valid index <code>$y &lt; $x</code>, it follows that <code>$ok-&gt;($y)</code> is false.</p>
+
+</li>
+</ul>
+
+<p>The return value of <b>bixectl</b> is any index satisfying the first constraint.</p>
+
+<p>If the interval <code>[$lo, $hi]</code> is empty, return <code>$hi</code>.</p>
+
+</dd>
+<dt id="bisectr-OK-ARRAY"><b>bisectr { OK } ARRAY</b></dt>
+<dd>
+
+</dd>
+<dt id="bixectr-OK-ARRAY"><b>bixectr { OK } ARRAY</b></dt>
+<dd>
+
+<p>Perform right bisection with respect to a predicate <b>OK</b> on the half-open interval <code>($lo, $hi]</code>, where <code>$hi</code> precedes <code>$lo</code> in the argument list. The prototype is <code>&amp;$;$$</code>.</p>
+
+<p>The predicate should be decreasing over every pair of adjacent indices it is defined on. That is, true values always precede false values:</p>
+
+<pre><code>T T T ... T F F F   ok(x)
+0 1 2     6 7 8 9      x</code></pre>
+
+<p>Let <code>$ok</code> denote the predicate, and set <code>$ok-&gt;($lo) = 1</code>. The return value of <b>bisectr</b> is the unique index <code>$x</code> on the closed interval <code>[$lo, $hi]</code> such that:</p>
+
+<ul>
+
+<li><p><code>$ok-&gt;($x)</code> is true.</p>
+
+</li>
+<li><p>For all valid index <code>$y &gt; $x</code>, it follows that <code>$ok-&gt;($y)</code> is false.</p>
+
+</li>
+</ul>
+
+<p>The return value of <b>bixectr</b> is any index satisfying the first constraint.</p>
+
+<p>If the interval <code>[$lo, $hi]</code> is empty, return <code>$lo</code>.</p>
+
+</dd>
+</dl>
+
+<p>In general, a return value of <code>$hi</code> (for left bisection) and <code>$lo</code> (for right bisection) is not meaningful as it is the only index taken to be true for granted. Caller should handle it separately, or check if the comparison result and/or element are defined by calling in list context.</p>
+
+<dl>
+
+<dt id="blsrch0-ORD-ARRAY"><b>blsrch0 { ORD } ARRAY</b></dt>
+<dd>
+
+</dd>
+<dt id="blsrchx-ORD-ARRAY"><b>blsrchx { ORD } ARRAY</b></dt>
+<dd>
+
+</dd>
+<dt id="blsrch1-ORD-ARRAY"><b>blsrch1 { ORD } ARRAY</b></dt>
+<dd>
+
+</dd>
+<dt id="blsrch2-ORD-ARRAY"><b>blsrch2 { ORD } ARRAY</b></dt>
+<dd>
+
+<p>Perform binary left search with respect to an ordering <b>ORD</b> on the half-open interval <code>[$lo, $hi)</code>, where <code>$lo</code> precedes <code>$hi</code> in the argument list. The prototype is <code>&amp;$;$$</code>.</p>
+
+<p>The sign of the ordering should be increasing over every pair of adjacent indices it is defined on. That is, <code>&lt;0</code> (negative) precedes <code>=0</code> (zero), which precedes <code>&gt;0</code> (positive).</p>
+
+<p>Let <code>$ord</code> denote the ordering and set <code>$ord-&gt;($hi) = +Infinity</code>. The return value of <b>blsrch0</b> is the unique index <code>$lb</code> on the closed interval <code>[$lo, $hi]</code> such that:</p>
+
+<ul>
+
+<li><p><code>$ord-&gt;($lb) &gt;= 0</code>.</p>
+
+</li>
+<li><p>For all valid index <code>$x &lt; $lb</code>, it follows that <code>$ord-&gt;($x) &lt; 0</code>. As a result, <code>$lb</code> is the first instance where <code>$ord &gt;= 0</code>, while <code>$lb - 1</code> is the last instance where <code>$ord &lt; 0</code>. (Compare this to <code>$lx</code> returned by <b>brsrch1</b>.)</p>
+
+</li>
+</ul>
+
+<p>The return value of <b>blsrchx</b> is any index <code>$x</code> satisfying <code>$ord-&gt;($x) == 0</code>, but if one could not be found, it returns the same result as <code>blsrch0</code>.</p>
+
+<p>The return value of <b>blsrch1</b> is the unique index <code>$ux</code> on the closed interval <code>[$lo, $hi]</code> such that:</p>
+
+<ul>
+
+<li><p><code>$ord-&gt;($ux) &gt; 0</code>.</p>
+
+</li>
+<li><p>For all valid index <code>$x &lt; $ux</code>, it follows that <code>$ord-&gt;($x) &lt;= 0</code>. As a result, <code>$ux</code> is the first instance where <code>$ord &gt; 0</code>, while <code>$ux - 1</code> is the last instance where <code>$ord &lt;= 0</code>. (Compare this to <code>$ub</code> returned by <b>brsrch0</b>.)</p>
+
+</li>
+</ul>
+
+<p>In list context, <b>blsrch2</b> returns both <code>$lb</code> and <code>$ux</code>, in that order. In scalar context, it returns the nonnegative difference <code>$ux - $lb</code>, which equals the number of elements for which <code>$ord == 0</code>.</p>
+
+</dd>
+<dt id="brsrch0-ORD-ARRAY"><b>brsrch0 { ORD } ARRAY</b></dt>
+<dd>
+
+</dd>
+<dt id="brsrchx-ORD-ARRAY"><b>brsrchx { ORD } ARRAY</b></dt>
+<dd>
+
+</dd>
+<dt id="brsrch1-ORD-ARRAY"><b>brsrch1 { ORD } ARRAY</b></dt>
+<dd>
+
+</dd>
+<dt id="brsrch2-ORD-ARRAY"><b>brsrch2 { ORD } ARRAY</b></dt>
+<dd>
+
+<p>Perform binary right search with respect to an ordering <b>ORD</b> on the half-open interval <code>($lo, $hi]</code>, where <code>$hi</code> precedes <code>$lo</code> in the argument list. The prototype is <code>&amp;$;$$</code>.</p>
+
+<p>The sign of the ordering should be decreasing over every pair of adjacent indices it is defined on. That is, <code>&gt;0</code> (positive) precedes <code>=0</code> (zero), which precedes <code>&lt;0</code> (negative).</p>
+
+<p>Let <code>$ord</code> denote the ordering and set <code>$ord-&gt;($lo) = +Infinity</code>. The return value of <b>brsrch0</b> is the unique index <code>$ub</code> on the closed interval <code>[$lo, $hi]</code> such that:</p>
+
+<ul>
+
+<li><p><code>$ord-&gt;($ub) &gt;= 0</code>.</p>
+
+</li>
+<li><p>For all valid index <code>$x &gt; $ub</code>, it follows that <code>$ord-&gt;($x) &lt; 0</code>. As a result, <code>$ub</code> is the last instance where <code>-$ord &lt;= 0</code> and <code>$ub + 1</code> is the first instance where <code>-$ord &gt; 0</code>. (Compare this to <code>$ux</code> returned by <b>blsrch1</b>.)</p>
+
+</li>
+</ul>
+
+<p>The return value of <b>brsrchx</b> is any index <code>$x</code> satisfying <code>$ord-&gt;($x) == 0</code>, but if one could not be found, it returns the same result as <code>brsrch0</code>.</p>
+
+<p>The return value of <b>brsrch1</b> is the unique index <code>$lx</code> on the closed interval <code>[$lo, $hi]</code> such that:</p>
+
+<ul>
+
+<li><p><code>$ord-&gt;($lx) &gt; 0</code>.</p>
+
+</li>
+<li><p>For all valid index <code>$x &gt; $lx</code>, it follows that <code>$ord-&gt;($x) &lt;= 0</code>. As a result, <code>$lx</code> is the last instance where <code>-$ord &lt; 0</code> and <code>$lx + 1</code> is the first instance where <code>-$ord &gt;= 0</code>. (Compare this to <code>$lb</code> returned by <b>blsrch0</b>.)</p>
+
+</li>
+</ul>
+
+<p>In list context, <b>brsrch2</b> returns both <code>$ub</code> and <code>$lx</code>, in that order. In scalar context, it returns the nonnegative difference <code>$ub - $lx</code>, which equals the number of elements for which <code>$ord == 0</code>.</p>
+
+</dd>
+</dl>
+
+<h1 id="COMMON-INTERFACE">COMMON INTERFACE</h1>
+
+<pre><code># TODO !</code></pre>
+
+<h1 id="CAVEATS">CAVEATS</h1>
+
+<pre><code># TODO !</code></pre>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<p><a href="https://metacpan.org/pod/List::MoreUtils">List::MoreUtils</a>, <a href="https://metacpan.org/pod/List::Search">List::Search</a>, <a href="https://metacpan.org/pod/List::BinarySearch">List::BinarySearch</a>, <a href="https://metacpan.org/pod/List::BinarySearch::XS">List::BinarySearch::XS</a>.</p>
+
+<h1 id="LINKS">LINKS</h1>
+
+<ul>
+
+<li><p>Home page: <a href="https://pub.rapidcow.org/CPAN/Sort-Search/">https://pub.rapidcow.org/CPAN/Sort-Search/</a></p>
+
+</li>
+<li><p>Git repository: <a href="https://github.com/rapidcow/p5-Sort-Search">https://github.com/rapidcow/p5-Sort-Search</a></p>
+
+</li>
+</ul>
+
+
+</body>
+
+</html>
+
+

@@ -24,6 +24,12 @@
 	<pre><code>git clone https://git.rapidcow.org/pub/lib/perl5/Sort-Search.git p5-Sort-Search
 	  # OR over ssh:
 git clone guest@git.rapidcow.org:pub/lib/perl5/Sort-Search.git p5-Sort-Search</code></pre>
+	<p>NOTE ABOUT GIT VCS: Expect that I will force-update devel branch.
+	I would almost always document "why" and give a range-diff, and you
+	may find that out in <b>refs/notes/amends</b>.  It is not guaranteed
+	to make sense as I primarily keep it for personal bookkeeping (think
+	<b>amlog</b> in the Git project?)  If I do update the master branch
+	then I do apologize for that (though I try not to now, so...)</p>
 	<h2 id="DEP">Dependencies</h2>
 	<p>Sort::Search should run on most Perls (I put Perl 5.6
 	because that's the default minimum version of <a href="https://metacpan.org/dist/Module-Starter/view/bin/module-starter">module-starter</a>,
@@ -50,9 +56,9 @@ git clone guest@git.rapidcow.org:pub/lib/perl5/Sort-Search.git p5-Sort-Search</c
 	on the "From" header, please also let me know what alternatives
 	you would prefer.</p><p>You can also use <a href="https://git-scm.com/docs/git-request-pull">git-request-pull</a>
 	if you made your changes in a Git repository that is not on GitHub;
-	be noted that git-pull will include the URL of your repository,
-	so if that's not something you want other people to see, you
-	should tell me about it too.</p>
+	be noted that git-pull will include the URL of your repository, so
+	if that's not something you want other people to see, you should
+	tell me about it too.</p>
 	<h2 id="SECURITY">Report security vulnerabilities</h2>
 	<p>From the current revision of <a href="https://github.com/rapidcow/p5-Sort-Search/blob/233453a5faa13ecdf2b0d9f300eabdd43dfd0799/.github/SECURITY.md">SECURITY.md</a>:</p>
 	<blockquote>
@@ -64,20 +70,15 @@ git clone guest@git.rapidcow.org:pub/lib/perl5/Sort-Search.git p5-Sort-Search</c
 		</ul>
 	</blockquote>
 	<h2 id="POD">Documentation</h2>
-	<p>I have written some over <a href="https://www.rapidcow.org/~ethan/FastLook.pm">here</a>
-	but it's too long and unstructured for people to actually make use of it.
-	<s>I'll write up a new one near the end of this month (and year)</s> (okay
-	please just wait until I get back to school i really don't wanna do it now
-	<code>TvT</code>) but until then that would be the best I got.</p>
-	<p>There will also be a separate Cookbook/Tutorial POD for a more
-	example-driven approach to these functions.  The documentation
-	itself will be more focused on usage.  I may take inspiration from
-	features that the existing binary search libraries lack, such as
-	<a href="https://github.com/daoswald/List-BinarySearch-XS/issues/2">this issue</a>.</p>
-	<p>There is also a more narrative approach that is basically
-	the design note, though it is more or less for myself and will
-	not be included in the distribution.  There is an
-	<a href="https://github.com/rapidcow/p5-Sort-Search/blob/master/src/00INTRO.txt">initial section</a>,
-	and there will be subsequent sections that cover the less
-	theoretical and more practical cases you may encounter.</p>
+	<p>We have two PODs at the moment!</p>
+	<ul>
+		<li><a href="pod/Sort/Search.html">Sort::Search</a></li>
+		<li><a href="pod/Sort/Search/Cookbook.html">Sort::Search::Cookbook</a></li>
+	</ul>
+	<p>More is being written.  For now enjoy this!!! :)</p>
+	<h2 id="TXT">Essay</h2>
+	<p>This is being written jointly where I take a more
+	"chill" approach to things: [<a href="00INTRO.txt">00INTRO.txt</a>] [01ARRAY.txt] [02USAGE.txt]</p>
+	<p>Read it if you're in for a more narrative introduction
+	to the module! :^)</p>
 </body>

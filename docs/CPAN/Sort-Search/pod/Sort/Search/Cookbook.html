@@ -1,0 +1,333 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Sort::Search::Cookbook - practical examples for Sort::Search</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:ethan@rapidcow.org" title="Pod::Html 1.35 (with xrefs by Ethan)" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DEFINITION">DEFINITION</a></li>
+  <li><a href="#EXAMPLES">EXAMPLES</a>
+    <ul>
+      <li><a href="#Exact-match">Exact match</a></li>
+    </ul>
+  </li>
+  <li><a href="#CONVERSION-GUIDE">CONVERSION GUIDE</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>Sort::Search::Cookbook - practical examples for Sort::Search</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<p>This is a collection of quick references and examples on how to use <a href="../Search.pm.html">Sort::Search</a>. It is not expected that you read this document linearly, although the first two sections here are introductory in nature, and are thus understood to have been read.</p>
+
+<p>As a general rule of thumb, any existing binary search function most definitely translates to a &quot;left search&quot; here. Despite examples are provided for both, keep in mind that &quot;right search&quot; is unconventional (at least to my knowledge) and can be counterintuitive.</p>
+
+<h1 id="DEFINITION">DEFINITION</h1>
+
+<p>The terms &quot;predicate&quot;, &quot;ordering&quot;, &quot;search range&quot; are used in the same sense as they are defined in <a href="../Search.pm.html#Terminology">&quot;Terminology&quot; in Sort::Search</a>. In addition, assume these variables mean the following:</p>
+
+<dl>
+
+<dt id="pod-_"><b>$_</b></dt>
+<dd>
+
+<p>The current element during a search.</p>
+
+</dd>
+<dt id="idx"><b>$idx</b></dt>
+<dd>
+
+<p>The array index result found by a search. The index may not correspond to a real element in the array, in which case the following two variables would be <code>undef</code>.</p>
+
+</dd>
+<dt id="cmp"><b>$cmp</b></dt>
+<dd>
+
+<p>The comparison result returned by the predicate/ordering on the found element. If there is no such element, this is <code>undef</code>.</p>
+
+</dd>
+<dt id="elp"><b>$elp</b></dt>
+<dd>
+
+<p>The scalar ref to the found element, or <code>undef</code> if none was found.</p>
+
+</dd>
+</dl>
+
+<p>You import the appropriate functions into your current namespace like this:</p>
+
+<pre><code>use Sort::Search qw( blsrch0 blsrch1 );
+       # imports `blsrch0&#39;, `blsrch1&#39;</code></pre>
+
+<p>... you get the point. If you need more just add more to the list. :)</p>
+
+<h1 id="EXAMPLES">EXAMPLES</h1>
+
+<h2 id="Exact-match">Exact match</h2>
+
+<p>The second field <code>$cmp</code> can be used to determine (1) if the return index corresponds to a real array element and (2) if the return index corresponds to an exact match.</p>
+
+<p>For (1), check <code>$cmp</code> is defined. For (2), check if <code>$cmp</code> equals zero, which is equivalent to checking <code>$array-&gt;[$idx] &lt;=&gt; $want</code>, but it save you an extra comparison. If you also need the array element, use the third field <code>$elt</code>, which is equivalent to <code>$array-&gt;[$idx]</code>.</p>
+
+<p>Concretely, given the numerically sorted array:</p>
+
+<pre><code>my @array = qw( 12 17a 17b 17c 21 );</code></pre>
+
+<p>and the numeric ordering:</p>
+
+<pre><code>                      (-) $_  precedes $want
+sub { $_ &lt;=&gt; $want }  (0) $_  equals   $want
+                      (+) $_  follows  $want</code></pre>
+
+<p>you can find the first match with <b>blsrch0</b>:</p>
+
+<pre><code>sub lsearch {
+    my ($array, $want) = @_;
+    my ($idx, $cmp, $elp) = blsrch0 { $_ &lt;=&gt; $want } $array;
+    if (!defined $cmp) { print &quot;$want not found anywhere\n&quot;; }
+    elsif ($cmp != 0)  { print &quot;$want not found; best &quot;
+                             . &quot;is $$elp at [$idx]\n&quot;; }
+    else               { print &quot;$want found at $$elp [$idx] :)\n&quot;; }
+}
+
+lsearch \@array =&gt; 11;  # 11 not found; best is 12 at [0]
+lsearch \@array =&gt; 12;  # 12 found at 12 [0] :)
+lsearch \@array =&gt; 17;  # 17 found at 17a [1] :)
+lsearch \@array =&gt; 18;  # 18 not found; best is 21 at [4]
+lsearch \@array =&gt; 99;  # 99 not found anywhere</code></pre>
+
+<p>and the last match with <b>brsrch0</b>:</p>
+
+<pre><code>sub rsearch {
+    my ($array, $want) = @_;
+    my ($idx, $cmp, $elp) = brsrch0 { $want &lt;=&gt; $_ } $array;
+    if (!defined $cmp) { print &quot;$want not found anywhere\n&quot;; }
+    elsif ($cmp != 0)  { print &quot;$want not found; best &quot;
+                             . &quot;is $$elp at [$idx]\n&quot;; }
+    else               { print &quot;$want found at $$elp [$idx] :)\n&quot;; }
+}
+
+rsearch \@array =&gt; 11;  # 11 not found anywhere
+rsearch \@array =&gt; 12;  # 12 found at 12 [0] :)
+rsearch \@array =&gt; 17;  # 17 found at 17c [3] :)
+rsearch \@array =&gt; 18;  # 18 not found; best is 17c at [3]
+rsearch \@array =&gt; 99;  # 99 not found; best is 21 at [4]</code></pre>
+
+<p>Notice that the ordering is reversed: <code>$want &lt;=&gt; $_</code> instead of <code>$_ &lt;=&gt; $want</code>, due to using a right search instead of a left search. The conventional left search may be used, though <code>$cmp</code> and <code>$elp</code> would be meaningless, thus you must check and retrieve the element separately:</p>
+
+<pre><code>sub rsearch {
+    my ($array, $want) = @_;
+    my $idx = blsrch1 { $_ &lt;=&gt; $want } $array;
+    --$idx;
+    if ($idx &lt; 0) {
+        print &quot;$want not found anywhere\n&quot;;
+    } else {
+        my $elt = $array-&gt;[$idx];
+        my $cmp = $elt &lt;=&gt; $want;
+        print $cmp == 0
+        ? &quot;$want found at $elt [$idx] :)\n&quot;
+        : &quot;$want not found; best is $elt at [$idx]\n&quot;;
+    }
+}</code></pre>
+
+<p>The output of this <code>rsearch</code> is identical to above.</p>
+
+<p>To get all matches at once, use <b>blsrch2</b> or <b>brsrch2</b>:</p>
+
+<pre><code>sub srchall {
+    my ($lo, $hi);
+    my ($array, $want) = @_;
+
+    # EITHER:
+    ($lo, $hi) = blsrch2 { $_ &lt;=&gt; $want } $array;
+    print &quot;[$_]=$array-&gt;[$_] &quot; for ($lo .. $hi-1);
+
+    # OR:
+    ($hi, $lo) = brsrch2 { $want &lt;=&gt; $_ } $array;
+    print &quot;[$_]=$array-&gt;[$_] &quot; for ($lo+1 .. $hi);
+}
+
+srchall \@array =&gt; 11;  # &lt;empty&gt;
+srchall \@array =&gt; 12;  # [0]=12
+srchall \@array =&gt; 17;  # [1]=17a [2]=17b [3]=17c
+srchall \@array =&gt; 21;  # [4]=21
+srchall \@array =&gt; 99;  # &lt;empty&gt;</code></pre>
+
+<p>Note that the left search range is right-exclusive and the right search is left-exclusive.</p>
+
+<h1 id="CONVERSION-GUIDE">CONVERSION GUIDE</h1>
+
+<p>From (other) CPAN modules:</p>
+
+<ul>
+
+<li><p>For <a href="https://metacpan.org/pod/List::MoreUtils">List::MoreUtils</a> (which this module in fact inspired by!) it&#39;s basically a verbatim translation. Namely this:</p>
+
+<pre><code>my (@ids, $lb, $ub);
+@ids = (1, 1, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4,
+        4, 4, 5, 5, 6, 7, 7, 7, 8, 8, 9, 9,
+        9, 9, 9, 11, 13, 13, 13, 17);
+
+# use List::MoreUtils qw(lower_bound);
+$lb = lower_bound { $_ &lt;=&gt; 2 } @ids; # returns 2
+$lb = lower_bound { $_ &lt;=&gt; 4 } @ids; # returns 10
+
+# use List::MoreUtils qw(upper_bound);
+$ub = upper_bound { $_ &lt;=&gt; 2 } @ids; # returns 4
+$ub = upper_bound { $_ &lt;=&gt; 4 } @ids; # returns 14
+
+# use List::MoreUtils qw(equal_range);
+($lb, $ub) = equal_range { $_ &lt;=&gt; 2 } @ids; # (2,4)
+($lb, $ub) = equal_range { $_ &lt;=&gt; 4 } @ids; # (10,14)</code></pre>
+
+<p>is equivalent to:</p>
+
+<pre><code>$lb = blsrch0 { $_ &lt;=&gt; 2 } \@ids; # returns 2
+$lb = blsrch0 { $_ &lt;=&gt; 4 } \@ids; # returns 10
+
+$ub = blsrch1 { $_ &lt;=&gt; 2 } \@ids; # returns 4
+$ub = blsrch1 { $_ &lt;=&gt; 4 } \@ids; # returns 14
+
+($lb, $ub) = blsrch2 { $_ &lt;=&gt; 2 } \@ids; # (2,4)
+($lb, $ub) = blsrch2 { $_ &lt;=&gt; 4 } \@ids; # (10,14)</code></pre>
+
+<p>Note that caller context matters for <b>blsrch0</b> and <b>blsrch1</b>. Namely they should be called in scalar context.</p>
+
+</li>
+<li><p>For <a href="https://metacpan.org/pod/List::BinarySearch">List::BinarySearch</a>, borrowing the definitions there:</p>
+
+<pre><code>my ($index, $low_ix, $high_ix);
+my @num_array = (100, 200, 300, 400, 500);
+my @str_array = qw(Bach Beethoven Brahms Mozart Schubert);</code></pre>
+
+<p><code>binsearch</code> is equivalent to <b>blsrch0</b>, minus the special case where no match is found which must be invalidated explicitly:</p>
+
+<pre><code># use List::BinarySearch qw(binsearch);
+$index = binsearch {$a &lt;=&gt; $b} 300, @num_array;      # 2
+$index = binsearch {$a cmp $b} &#39;Mozart&#39;, @str_array; # 3
+$index = binsearch {$a &lt;=&gt; $b} 42, @num_array;       # undef
+
+# equivalent to...
+sub exactly {
+    my ($idx, $cmp) = @_;
+    defined $cmp &amp;&amp; $cmp == 0 ? $idx : undef;
+}
+
+$index = exactly blsrch0 { $_ &lt;=&gt; 300 } \@num_array;      # 2
+$index = exactly blsrch0 { $_ cmp &#39;Mozart&#39; } \@str_array; # 3
+$index = exactly blsrch0 { $_ &lt;=&gt; 42 } \@num_array;       # undef</code></pre>
+
+<p><code>exactly</code> invalidates the last 0, where <code>$cmp</code> is 1 (100 &gt; 42).</p>
+
+<p><code>binsearch_pos</code> is just equivalent to <b>blsrch0</b>, called in ordinary scalar context:</p>
+
+<pre><code># use List::BinarySearch qw(binsearch_pos);
+$index = binsearch_pos {$a cmp $b} &#39;Chopin&#39;, @str_array; # 3
+$index = binsearch_pos {$a &lt;=&gt; $b} 600, @num_array;      # 5
+$index = binsearch_pos {$a &lt;=&gt; $b} 200, @num_array;      # 1
+
+# equivalent to:
+$index = blsrch0 { $_ cmp &#39;Chopin&#39; } \@str_array; # 3
+$index = blsrch0 { $_ &lt;=&gt; 600 } \@num_array;      # 5
+$index = blsrch0 { $_ &lt;=&gt; 200 } \@num_array;      # 1</code></pre>
+
+<p><code>binsearch_range</code> is equivalent to calling <code>binsearch_pos</code> against the two needles, which means calling <b>blsrch0</b> twice. This is <i>different</i> from <b>blsrch2</b>, though it would only significant if the second needle occurs more than once.</p>
+
+<pre><code># use List::BinarySearch qw(binsearch_range);
+( $low_ix, $high_ix )
+    = binsearch_range { $a cmp $b } &#39;Beethoven&#39;, &#39;Mozart&#39;, @str_array;
+    # Returns ( 1, 3 )
+
+( $low_ix, $high_ix )
+    = binsearch_range { $a &lt;=&gt; $b } 200, 400, @num_array;
+    # Returns ( 1, 3 )
+
+# equivalent to:
+($low_ix, $high_ix)
+    = ( # ... in either scalar context:
+        scalar ( blsrch0 { $_ cmp &#39;Beethoven&#39; } \@str_array ),
+        # ... or get just the index in list context:
+        ( blsrch0 { $_ cmp &#39;Mozart&#39; } \@str_array )[0],
+      );
+    # Returns (1, 3)
+
+($low_ix, $high_ix)
+    = map { my $want = $_;
+         scalar blsrch0 { $_ cmp $want }
+               \@num_array } (200, 400);
+    # Returns (1, 3)</code></pre>
+
+</li>
+<li><p>For <a href="https://metacpan.org/pod/List::Search">List::Search</a>, borrowing the definitions there:</p>
+
+<pre><code>my ($index, $found);
+my @list = sort qw( bravo charlie delta );
+my @numbers = sort { $a &lt;=&gt; $b } ( 10, 20, 100, 200, );
+my $cmp_code = sub { lc( $_[0] ) cmp lc( $_[1] ) };
+my @custom_list = sort { $cmp_code-&gt;( $a, $b ) } qw( FOO bar BAZ bundy );
+    # =&gt; (&#39;bar&#39;, &#39;BAZ&#39;, &#39;bundy&#39;, &#39;FOO&#39;);</code></pre>
+
+<p>the following:</p>
+
+<pre><code># use List::Search qw(list_search nlist_search custom_list_search);
+print list_search( &#39;alpha&#39;,   \@list );    #  0
+print list_search( &#39;charlie&#39;, \@list );    #  1
+print list_search( &#39;zebra&#39;,   \@list );    #  -1 (not found)
+
+print nlist_search( 20, \@numbers );       #  1
+
+print custom_list_search( $cmp_code, &#39;foo&#39;, \@custom_list );  # 3</code></pre>
+
+<p>can be written as</p>
+
+<pre><code>sub actually {
+    my ($idx, $cmp) = @_;
+    defined $cmp ? $idx : -1;
+}
+
+$index = actually blsrch0 { $_ cmp &#39;alpha&#39;   } \@list;  # 0
+$index = actually blsrch0 { $_ cmp &#39;charlie&#39; } \@list;  # 1
+$index = actually blsrch0 { $_ cmp &#39;zebra&#39;   } \@list;  # -1
+$index = actually blsrch0 { $_ &lt;=&gt; 20 } \@numbers;      # 1
+$index = actually blsrch0
+             { $cmp_code-&gt;($_, &#39;foo&#39;) } \@custom_list;  # 3</code></pre>
+
+<p>and for <code>s/_search/_contains/</code>, you can just check <code>$cmp</code> without regards to the index and (optionally) swap out with an eXistential search (which is only marginally faster, but semantically better to read IMO :).</p>
+
+<pre><code>sub validate {
+    my ($idx, $cmp) = @_;
+    defined $cmp &amp;&amp; $cmp == 0;
+}
+
+$found = validate blsrchx { $_ cmp &#39;alpha&#39;   } \@list;  # !!1
+$found = validate blsrchx { $_ cmp &#39;charlie&#39; } \@list;  # !!1
+$found = validate blsrchx { $_ cmp &#39;zebra&#39;   } \@list;  # !!0
+$found = validate blsrchx { $_ &lt;=&gt; 20 } \@numbers;      # !!1
+$found = validate blsrchx
+             { $cmp_code-&gt;($_, &#39;foo&#39;) } \@custom_list;  # !!1</code></pre>
+
+</li>
+</ul>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<p><a href="../Search.pm.html">Sort::Search</a>, the main documentation.</p>
+
+
+</body>
+
+</html>
+
+
