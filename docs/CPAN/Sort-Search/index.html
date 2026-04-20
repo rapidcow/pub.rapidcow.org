@@ -9,21 +9,19 @@
 <body>
 	<h1 id="NAME">Sort::Search</h1>
 	<p>This is the home page for the (UNNAMED, but possibly "Sort-Search"?)
-	distribution.  I will try to get it completed and published <s>shortly
-	after my school term ends</s> <strong>some time in uhhhh March!</strong>
-	(I'll probably also have r/perl and/or module-authors review my choice of
-	name&hellip;.)</p>
+	distribution.  I will try to get it completed and published <strong>some
+	time in May</strong>
+	(I'll publish a blog post on blogs.perl.org about it though.)</p>
 	<h2 id="SRC">Source code (Git repository)</h2>
-	<p>It will be hosted by the generous GitHub... here is the URL:</p>
+	<p>I use Codeberg for Gitweb and bug tracker:
+	<a href="https://codeberg.org/rapidcow/p5-Sort-Search">https://codeberg.org/rapidcow/p5-Sort-Search</a></p>
+	<p>You can clone from a handful of places as well:</p>
 	<ul>
-		<li><a href="https://github.com/rapidcow/p5-Sort-Search">https://github.com/rapidcow/p5-Sort-Search</a></li>
+		<li>https://git.rapidcow.org/pub/lib/perl5/Sort-Search.git</li>
+		<li>repo.or.cz: <a href="https://repo.or.cz/p5-Sort-Search.git">https://repo.or.cz/p5-Sort-Search.git</a></li>
+		<li>GitHub: <a href="https://github.com/rapidcow/p5-Sort-Search">https://github.com/rapidcow/p5-Sort-Search</a></li>
+		<li>Gitee: <a href="https://gitee.com/rapidcow/p5-Sort-Search">https://gitee.com/rapidcow/p5-Sort-Search</a></li>
 	</ul>
-	<p>If you prefer, you can also clone/view <a href="https://codeberg.org/rapidcow/p5-Sort-Search">Codeberg</a>
-	or <a href="https://repo.or.cz/p5-Sort-Search.git">repo.or.cz</a>.</p>
-	<p>You can clone from my server too btw!</p>
-	<pre><code>git clone https://git.rapidcow.org/pub/lib/perl5/Sort-Search.git p5-Sort-Search
-	  # OR over ssh:
-git clone guest@git.rapidcow.org:pub/lib/perl5/Sort-Search.git p5-Sort-Search</code></pre>
 	<p>NOTE ABOUT GIT VCS: Expect that I will force-update devel branch.
 	I would almost always document "why" and give a range-diff, and you
 	may find that out in <b>refs/notes/amends</b>.  It is not guaranteed
@@ -36,30 +34,17 @@ git clone guest@git.rapidcow.org:pub/lib/perl5/Sort-Search.git p5-Sort-Search</c
 	but I haven't really tested that far&hellip; I have
 	checked that that I only use core modules according
 	to corepack, either way. :x)</p>
-	<p>If <a href="https://metacpan.org/pod/Want">Want</a> is installed,
-	it would be called to determine the exact number of values
-	requested in list context.  The behavior shouldn't change,
-	but it may avoid having to copy array elements for the third
-	argument (though this may be redundant if your Perl is built
-	with COW, I haven't benchmarked anything either so&hellip;)</p>
 	<h2 id="BUG">Report bugs</h2>
 	<p>To submit any bugs you found (this early though???),
 	rt.cpan.org won't work as I haven't uploaded the package to CPAN.
-	So use the GitHub bug tracker: <a href="https://github.com/rapidcow/p5-Sort-Search/issues">https://github.com/rapidcow/p5-Sort-Search/issues</a>.</p>
-	<p>If you can and are willing to write up a fix, the GitHub
-	way to do it is to submit a Pull Request:
-	<a href="https://github.com/rapidcow/p5-Sort-Search/pulls">https://github.com/rapidcow/p5-Sort-Search/pulls</a></p>
-	<p>You can also send patches since I know how to apply them, but
-	the issue is I don't have a real mailing list, so other people
-	will not be able to join the discussion.  If your mail provider
-	doesn't let you change the author name and email as they appear
-	on the "From" header, please also let me know what alternatives
-	you would prefer.</p><p>You can also use <a href="https://git-scm.com/docs/git-request-pull">git-request-pull</a>
-	if you made your changes in a Git repository that is not on GitHub;
-	be noted that git-pull will include the URL of your repository, so
-	if that's not something you want other people to see, you should
-	tell me about it too.</p>
+	So use the Codeberg bug tracker: <a href="https://codeberg.org/rapidcow/p5-Sort-Search/issues">https://codeberg.org/rapidcow/p5-Sort-Search/issues</a>.</p>
 	<h2 id="SECURITY">Report security vulnerabilities</h2>
+	<!--
+		GitHub serves this faster; I'll use that out of practical concerns.
+		In truth I shouldn't even be referencing this externally; I'm just
+		too lazy to re-write this for this site.  It's provisional however
+		you look at it, and it may as well be GitHub. :P
+	-->
 	<p>From the current revision of <a href="https://github.com/rapidcow/p5-Sort-Search/blob/233453a5faa13ecdf2b0d9f300eabdd43dfd0799/.github/SECURITY.md">SECURITY.md</a>:</p>
 	<blockquote>
 		<p>This is the Security Policy for the CPAN distribution <code>Sort-Search</code>, based on the CPAN Security Group's Guidelines for Adding a Security Policy to Perl Distributions (version 1.4.2).</p>
@@ -69,6 +54,8 @@ git clone guest@git.rapidcow.org:pub/lib/perl5/Sort-Search.git p5-Sort-Search</c
 			<li>To me (the author) directly: <a href="mailto:security@rapidcow.org">security@rapidcow.org</a></li>
 		</ul>
 	</blockquote>
+	<p>I'm not really sure if I want to use GitHub for this...
+	please just email me I guess.</p>
 	<h2 id="POD">Documentation</h2>
 	<p>We have two PODs at the moment!</p>
 	<ul>
